@@ -106,7 +106,7 @@ input{
 
 <body>
 
-<h1>💖 Love Tic Tac Toe 💖</h1>
+<h1>💖🌝   උම්ම්ම්ම්ම😘   🌝💖</h1>
 
 <div id="menu">
   <button onclick="createRoom()">Create Room</button><br><br>
