@@ -14,7 +14,7 @@ res.send(`
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Love Tic Tac Toe 💖</title>
+<title>Tic Tac Toe for WASSI 💖</title>
 
 <!-- MOBILE FULL SCREEN -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
