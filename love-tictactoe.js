@@ -16,7 +16,7 @@ app.get("/", (req, res) => {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <meta name="theme-color" content="#ff85a2"/>
-  <title>Love Tic Tac Toe 💗 You & Me</title>
+  <title>Love Games 💗 You & Me</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -96,7 +96,12 @@ app.get("/", (req, res) => {
       box-shadow: 0 0 0 5px rgba(255, 133, 162, 0.25);
     }
 
-    #menu {
+    #mainMenu {
+      margin: 50px 0;
+    }
+
+    #roomMenu {
+      display: none;
       margin: 50px 0;
     }
 
@@ -104,6 +109,7 @@ app.get("/", (req, res) => {
       opacity: 0;
       transform: translateY(50px);
       transition: all 0.8s ease;
+      display: none;
     }
 
     #game.visible {
@@ -124,7 +130,7 @@ app.get("/", (req, res) => {
       font-weight: 500;
     }
 
-    #board {
+    #tttBoard {
       display: grid;
       grid-template-columns: repeat(3, minmax(110px, 30vw));
       gap: 18px;
@@ -161,6 +167,37 @@ app.get("/", (req, res) => {
       0%   { transform: scale(0.4) rotate(-15deg); opacity: 0; }
       60%  { transform: scale(1.25) rotate(8deg);  opacity: 1; }
       100% { transform: scale(1) rotate(0); }
+    }
+
+    #rpsChoices {
+      display: flex;
+      justify-content: center;
+      gap: 25px;
+      margin: 40px auto;
+      max-width: 500px;
+    }
+
+    .rpsBtn {
+      font-size: clamp(50px, 12vw, 80px);
+      padding: 20px;
+      background: rgba(255, 245, 250, 0.65);
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.35s ease;
+      box-shadow: 0 12px 35px rgba(200, 90, 143, 0.18);
+      border: 2px solid rgba(255, 133, 162, 0.25);
+    }
+
+    .rpsBtn:hover {
+      transform: scale(1.15);
+      background: rgba(255, 245, 250, 0.9);
+      border-color: #ff85a2;
+    }
+
+    #scores {
+      font-size: 1.4rem;
+      margin: 20px 0;
+      color: #c85a8f;
     }
 
     #chat {
@@ -245,9 +282,15 @@ app.get("/", (req, res) => {
 </head>
 <body>
 
-<h1>💗 You & Me Forever 💗</h1>
+<h1>💗 Our Love Games 💗</h1>
 
-<div id="menu">
+<div id="mainMenu">
+  <button onclick="selectGame('ttt')">Play Tic-Tac-Toe ♡</button><br><br>
+  <button onclick="selectGame('rps')">Play Rock-Paper-Scissors 💕</button>
+</div>
+
+<div id="roomMenu">
+  <h2 id="gameTitle"></h2>
   <button onclick="createRoom()">Create Our Room</button><br><br>
   <input id="joinCode" placeholder="Enter Love Code 💕"/><br><br>
   <button onclick="joinRoom()">Join My Love</button>
@@ -257,7 +300,15 @@ app.get("/", (req, res) => {
   <h3>Our Secret Room: <span id="roomCode"></span></h3>
   <h2 id="status"></h2>
 
-  <div id="board"></div>
+  <div id="tttBoard" style="display:none"></div>
+  <div id="rpsArea" style="display:none">
+    <div id="rpsChoices">
+      <div class="rpsBtn" onclick="makeChoice('rock')">✊</div>
+      <div class="rpsBtn" onclick="makeChoice('paper')">✋</div>
+      <div class="rpsBtn" onclick="makeChoice('scissors')">✌️</div>
+    </div>
+    <div id="scores"></div>
+  </div>
 
   <button onclick="requestRestart()">♡ Play Again ♡</button>
 
@@ -287,27 +338,35 @@ app.get("/", (req, res) => {
 <script src="/socket.io/socket.io.js"></script>
 <script>
 const socket = io();
-let roomId = null, symbol = null, myTurn = false;
-let board = Array(9).fill("");
+let roomId = null, symbol = null, myTurn = false, gameType = null;
+let board = Array(9).fill(""); // for ttt
+let myChoice = null, scores = {me: 0, opponent: 0}; // for rps
 
-const boardDiv = document.getElementById("board");
+const tttBoardDiv = document.getElementById("tttBoard");
 for(let i = 0; i < 9; i++){
   const c = document.createElement("div");
   c.className = "cell";
-  c.onclick = () => move(i);
-  boardDiv.appendChild(c);
+  c.onclick = () => tttMove(i);
+  tttBoardDiv.appendChild(c);
 }
 
-function createRoom(){ socket.emit("createRoom"); }
+function selectGame(type) {
+  gameType = type;
+  document.getElementById("mainMenu").style.display = "none";
+  document.getElementById("roomMenu").style.display = "block";
+  document.getElementById("gameTitle").innerText = type === 'ttt' ? "Tic-Tac-Toe for Us ♡" : "Rock-Paper-Scissors Love 💕";
+}
+
+function createRoom(){ socket.emit("createRoom", {gameType}); }
 function joinRoom(){ 
   const code = document.getElementById("joinCode").value.trim();
-  if(code) socket.emit("joinRoom", code); 
+  if(code) socket.emit("joinRoom", {roomId: code, gameType});
 }
 
 socket.on("roomCreated", id => {
   roomId = id;
-  document.getElementById("menu").style.display = "none";
-  document.getElementById("game").classList.add("visible");
+  document.getElementById("roomMenu").style.display = "none";
+  setupGame();
   document.getElementById("roomCode").innerText = id;
   document.getElementById("status").innerText = "Waiting for my forever love 💗";
 });
@@ -315,34 +374,61 @@ socket.on("roomCreated", id => {
 socket.on("startGame", d => {
   symbol = d.symbol;
   roomId = d.roomId;
-  myTurn = symbol === "❤️";
-  document.getElementById("menu").style.display = "none";
-  document.getElementById("game").classList.add("visible");
+  gameType = d.gameType;
+  myTurn = d.playerIndex === 0;
+  document.getElementById("roomMenu").style.display = "none";
+  setupGame();
   document.getElementById("roomCode").innerText = roomId;
   updateStatus();
+  if(gameType === 'rps') updateScores(d.scores || {0:0,1:0});
 });
 
-function updateStatus(){
-  document.getElementById("status").innerText = myTurn ? "Your turn, my love ♡" : "Waiting for you... 💕";
+function setupGame() {
+  document.getElementById("game").style.display = "block";
+  document.getElementById("game").classList.add("visible");
+  if(gameType === 'ttt') {
+    document.getElementById("tttBoard").style.display = "grid";
+    document.getElementById("rpsArea").style.display = "none";
+  } else {
+    document.getElementById("tttBoard").style.display = "none";
+    document.getElementById("rpsArea").style.display = "block";
+  }
 }
 
-function move(i){
-  if(!myTurn || board[i]) return;
+function updateStatus(){
+  if(gameType === 'ttt') {
+    document.getElementById("status").innerText = myTurn ? "Your turn, my love ♡" : "Waiting for you... 💕";
+  } else {
+    document.getElementById("status").innerText = myChoice ? "Waiting for love's choice 💗" : "Choose your move ♡";
+  }
+}
+
+function tttMove(i){
+  if(gameType !== 'ttt' || !myTurn || board[i]) return;
   board[i] = symbol;
-  render();
+  renderTTT();
   socket.emit("move", {roomId, board});
   myTurn = false;
   updateStatus();
 }
 
-socket.on("update", b => {
-  board = b;
-  myTurn = true;
-  render();
-  updateStatus();
+socket.on("update", data => {
+  if(gameType === 'ttt') {
+    board = data.board;
+    myTurn = true;
+    renderTTT();
+    updateStatus();
+  } else if(gameType === 'rps') {
+    // For RPS update after round
+    scores.me = data.scores[symbol === "❤️" ? 0 : 1];
+    scores.opponent = data.scores[symbol === "❤️" ? 1 : 0];
+    updateScores(data.scores);
+    myChoice = null;
+    updateStatus();
+  }
 });
 
-function render(){
+function renderTTT(){
   document.querySelectorAll(".cell").forEach((c, i) => {
     c.innerText = board[i];
     c.className = "cell";
@@ -352,12 +438,38 @@ function render(){
   });
 }
 
-socket.on("win", winSymbol => {
+function makeChoice(choice){
+  if(gameType !== 'rps' || myChoice) return;
+  myChoice = choice;
+  socket.emit("choice", {roomId, choice});
+  updateStatus();
+}
+
+function updateScores(rawScores){
+  const myScore = symbol === "❤️" ? rawScores[0] : rawScores[1];
+  const oppScore = symbol === "❤️" ? rawScores[1] : rawScores[0];
+  document.getElementById("scores").innerText = `You: ${myScore} ♡ Love: ${oppScore}`;
+}
+
+socket.on("roundResult", data => {
+  // Show result, e.g. status
+  let resultText = `You chose ${data.myChoice}, Love chose ${data.oppChoice}. `;
+  if(data.winner === 'me') resultText += "You win this round! ♡";
+  else if(data.winner === 'opponent') resultText += "Love wins this round 💗";
+  else resultText += "It's a tie! 💕";
+  document.getElementById("status").innerText = resultText;
+  setTimeout(() => {
+    myChoice = null;
+    updateStatus();
+  }, 3000);
+});
+
+socket.on("win", winData => {
   document.getElementById("winOverlay").style.display = "flex";
   const symEl = document.getElementById("resultSymbol");
-  symEl.innerText = winSymbol;
+  symEl.innerText = winData.symbol;
   
-  if(winSymbol === symbol){
+  if(winData.isWinner){
     document.getElementById("resultText").innerText = "You Won My Heart! ♡";
     symEl.classList.add("winner-heart");
     document.getElementById("taskArea").style.display = "block";
@@ -385,9 +497,15 @@ function requestRestart(){
   socket.emit("restart", roomId);
 }
 
-socket.on("restart", () => {
-  board = Array(9).fill("");
-  render();
+socket.on("restart", (data) => {
+  if(gameType === 'ttt') {
+    board = Array(9).fill("");
+    renderTTT();
+  } else {
+    myChoice = null;
+    scores = {me:0, opponent:0};
+    updateScores(data.scores);
+  }
   document.getElementById("winOverlay").style.display = "none";
   myTurn = symbol === "❤️";
   updateStatus();
@@ -408,6 +526,10 @@ socket.on("chat", m => {
   document.getElementById("messages").appendChild(d);
   d.scrollIntoView({behavior: "smooth"});
 });
+
+socket.on("task", task => {
+  alert("Your love's wish: " + task); // Simple for now, can improve
+});
 </script>
 
 </body>
@@ -415,41 +537,92 @@ socket.on("chat", m => {
   `);
 });
 
-// ────────────────────────────────────────────────
-// Backend logic remains the same (no changes needed)
-// ────────────────────────────────────────────────
-
 io.on("connection", socket => {
-  socket.on("createRoom", () => {
+  socket.on("createRoom", ({gameType}) => {
     const id = Math.random().toString(36).substring(2, 8);
-    rooms[id] = { players: [socket.id] };
+    rooms[id] = {
+      type: gameType,
+      players: [socket.id],
+      state: gameType === 'ttt' ? {board: Array(9).fill("")} : {choices: {}, scores: [0,0]}
+    };
     socket.join(id);
     socket.emit("roomCreated", id);
   });
 
-  socket.on("joinRoom", id => {
+  socket.on("joinRoom", ({roomId: id, gameType}) => {
     const r = rooms[id];
-    if (!r || r.players.length === 2) return;
+    if (!r || r.type !== gameType || r.players.length === 2) return;
     r.players.push(socket.id);
     socket.join(id);
 
-    io.to(r.players[0]).emit("startGame", { symbol: "❤️", roomId: id });
-    io.to(r.players[1]).emit("startGame", { symbol: "💗", roomId: id });
+    const symbols = ["❤️", "💗"];
+    io.to(r.players[0]).emit("startGame", { symbol: symbols[0], roomId: id, gameType, playerIndex: 0, scores: r.state.scores });
+    socket.emit("startGame", { symbol: symbols[1], roomId: id, gameType, playerIndex: 1, scores: r.state.scores });
   });
 
   socket.on("move", ({ roomId, board }) => {
+    const r = rooms[roomId];
+    if(r.type !== 'ttt') return;
+    r.state.board = board;
     const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
     for (const [a,b,c] of wins) {
       if (board[a] && board[a] === board[b] && board[a] === board[c]) {
-        io.to(roomId).emit("win", board[a]);
+        const winnerIndex = board[a] === "❤️" ? 0 : 1;
+        io.to(r.players[0]).emit("win", {symbol: board[a], isWinner: winnerIndex === 0});
+        io.to(r.players[1]).emit("win", {symbol: board[a], isWinner: winnerIndex === 1});
         return;
       }
     }
-    socket.to(roomId).emit("update", board);
+    socket.to(roomId).emit("update", {board});
+  });
+
+  socket.on("choice", ({ roomId, choice }) => {
+    const r = rooms[roomId];
+    if(r.type !== 'rps') return;
+    const playerIndex = r.players.indexOf(socket.id);
+    r.state.choices[playerIndex] = choice;
+    if(Object.keys(r.state.choices).length === 2) {
+      const [c0, c1] = [r.state.choices[0], r.state.choices[1]];
+      let winner = null;
+      if(c0 === c1) winner = 'tie';
+      else if(
+        (c0 === 'rock' && c1 === 'scissors') ||
+        (c0 === 'scissors' && c1 === 'paper') ||
+        (c0 === 'paper' && c1 === 'rock')
+      ) {
+        winner = 0;
+        r.state.scores[0]++;
+      } else {
+        winner = 1;
+        r.state.scores[1]++;
+      }
+
+      // Emit round result
+      io.to(r.players[0]).emit("roundResult", {myChoice: c0, oppChoice: c1, winner: winner === 0 ? 'me' : winner === 1 ? 'opponent' : 'tie'});
+      io.to(r.players[1]).emit("roundResult", {myChoice: c1, oppChoice: c0, winner: winner === 1 ? 'me' : winner === 0 ? 'opponent' : 'tie'});
+
+      // Check overall win (first to 3)
+      if(r.state.scores[0] >= 3 || r.state.scores[1] >= 3) {
+        const overallWinner = r.state.scores[0] >= 3 ? 0 : 1;
+        const winSymbol = overallWinner === 0 ? "❤️" : "💗";
+        io.to(r.players[0]).emit("win", {symbol: winSymbol, isWinner: overallWinner === 0});
+        io.to(r.players[1]).emit("win", {symbol: winSymbol, isWinner: overallWinner === 1});
+      } else {
+        // Continue
+        io.to(roomId).emit("update", {scores: r.state.scores});
+      }
+      r.state.choices = {};
+    }
   });
 
   socket.on("restart", roomId => {
-    io.to(roomId).emit("restart");
+    const r = rooms[roomId];
+    if(r.type === 'ttt') r.state.board = Array(9).fill("");
+    else {
+      r.state.scores = [0,0];
+      r.state.choices = {};
+    }
+    io.to(roomId).emit("restart", {scores: r.state.scores});
   });
 
   socket.on("chat", d => io.to(d.roomId).emit("chat", d.msg));
@@ -457,5 +630,5 @@ io.on("connection", socket => {
 });
 
 server.listen(3000, () => {
-  console.log("💗 Love Tic Tac Toe running → http://localhost:3000");
+  console.log("💗 Love Games running → http://localhost:3000");
 });
