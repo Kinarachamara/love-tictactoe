@@ -11,99 +11,99 @@ const rooms = {};
 app.get("/", (req, res) => {
   res.send(`
 <!DOCTYPE html>
-<html lang="si">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
-  <meta name="apple-mobile-web-app-capable" content="yes"/>
-  <meta name="theme-color" content="#ff2e63"/>
-  <title>Tic Tac Toe 💖 WASSI 🌝</title>
+  <meta name="theme-color" content="#ff85a2"/>
+  <title>Love Tic Tac Toe 💗 You & Me</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 
   <style>
     * {
-      box-sizing: border-box;
       margin: 0;
       padding: 0;
+      box-sizing: border-box;
     }
 
     body {
       min-height: 100vh;
-      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-      background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 100%);
-      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #ffe6f0 0%, #fff0f5 50%, #f8e1ff 100%);
+      color: #4a2c3f;
       text-align: center;
       overflow-x: hidden;
       background-attachment: fixed;
     }
 
     h1 {
-      font-size: clamp(2rem, 8vw, 4rem);
-      margin: 30px 0 20px;
-      color: #fff;
-      text-shadow: 0 5px 20px rgba(255,46,99,0.6);
-      animation: float 7s ease-in-out infinite;
+      font-family: 'Dancing Script', cursive;
+      font-size: clamp(3.2rem, 10vw, 5.8rem);
+      color: #ff85a2;
+      margin: 35px 0 20px;
+      text-shadow: 0 6px 20px rgba(255, 133, 162, 0.45);
+      animation: gentleFloat 8s ease-in-out infinite;
     }
 
-    @keyframes float {
-      0%,100% { transform: translateY(0); }
-      50%     { transform: translateY(-15px); }
+    @keyframes gentleFloat {
+      0%,100% { transform: translateY(0) rotate(0deg); }
+      50%     { transform: translateY(-18px) rotate(1.5deg); }
     }
 
     button {
-      padding: 14px 34px;
+      padding: 16px 38px;
       border: none;
-      border-radius: 50px;
-      background: #ff2e63;
+      border-radius: 999px;
+      background: linear-gradient(45deg, #ff85a2, #ff9bb5);
       color: white;
-      font-size: 1.15rem;
+      font-size: 1.2rem;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 8px 25px rgba(255,46,99,0.45);
-      margin: 12px 0;
+      transition: all 0.35s ease;
+      box-shadow: 0 10px 30px rgba(255, 133, 162, 0.4);
+      margin: 14px 6px;
     }
 
     button:hover {
-      transform: translateY(-4px) scale(1.06);
-      box-shadow: 0 14px 35px rgba(255,46,99,0.6);
-      background: #ff477e;
-    }
-
-    button:active {
-      transform: translateY(1px);
+      transform: translateY(-5px) scale(1.08);
+      box-shadow: 0 18px 45px rgba(255, 133, 162, 0.55);
+      background: linear-gradient(45deg, #ff9bb5, #ff85a2);
     }
 
     input {
-      padding: 14px 20px;
-      border-radius: 50px;
-      border: none;
-      width: 85%;
-      max-width: 320px;
-      font-size: 1.05rem;
-      background: rgba(255,255,255,0.28);
+      padding: 16px 24px;
+      border-radius: 999px;
+      border: 2px solid #ffd1dc;
+      width: 88%;
+      max-width: 340px;
+      font-size: 1.1rem;
+      background: rgba(255, 255, 255, 0.75);
       backdrop-filter: blur(12px);
-      color: white;
-      margin: 14px 0;
+      color: #4a2c3f;
+      margin: 16px 0;
     }
 
     input::placeholder {
-      color: rgba(255,255,255,0.75);
+      color: #d69bbe;
     }
 
     input:focus {
       outline: none;
-      box-shadow: 0 0 0 4px rgba(255,46,99,0.45);
-      background: rgba(255,255,255,0.38);
+      border-color: #ff85a2;
+      box-shadow: 0 0 0 5px rgba(255, 133, 162, 0.25);
     }
 
     #menu {
-      margin: 40px 0;
+      margin: 50px 0;
     }
 
     #game {
       opacity: 0;
-      transform: translateY(40px);
-      transition: all 0.7s ease;
+      transform: translateY(50px);
+      transition: all 0.8s ease;
     }
 
     #game.visible {
@@ -111,166 +111,171 @@ app.get("/", (req, res) => {
       transform: translateY(0);
     }
 
-    h3, h2 {
-      margin: 12px 0;
-      text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    h3 {
+      font-size: 1.5rem;
+      color: #c85a8f;
+      margin: 15px 0;
+    }
+
+    #status {
+      font-size: 1.6rem;
+      color: #6b3f5c;
+      margin: 20px 0;
+      font-weight: 500;
     }
 
     #board {
       display: grid;
-      grid-template-columns: repeat(3, minmax(100px, 28vw));
-      gap: 16px;
+      grid-template-columns: repeat(3, minmax(110px, 30vw));
+      gap: 18px;
       justify-content: center;
-      margin: 35px auto;
-      max-width: 460px;
+      margin: 40px auto;
+      max-width: 500px;
     }
 
     .cell {
       aspect-ratio: 1/1;
-      background: rgba(255,255,255,0.2);
-      backdrop-filter: blur(14px);
-      border-radius: 28px;
-      font-size: clamp(50px, 13vw, 90px);
+      background: rgba(255, 245, 250, 0.65);
+      backdrop-filter: blur(16px);
+      border-radius: 32px;
+      font-size: clamp(60px, 15vw, 100px);
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.3s ease;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-      border: 1px solid rgba(255,255,255,0.15);
+      transition: all 0.35s ease;
+      box-shadow: 0 12px 35px rgba(200, 90, 143, 0.18);
+      border: 2px solid rgba(255, 133, 162, 0.25);
     }
 
     .cell:hover {
-      background: rgba(255,255,255,0.32);
-      transform: scale(1.07);
+      background: rgba(255, 245, 250, 0.9);
+      transform: scale(1.08) rotate(2deg);
+      border-color: #ff85a2;
     }
 
-    .cell.heart { color: #ff2e63; animation: pop 0.45s; }
-    .cell.love  { color: #ff477e; animation: pop 0.45s; }
+    .cell.heart { color: #ff4d82; animation: lovePop 0.6s; }
+    .cell.love  { color: #ff85a2; animation: lovePop 0.6s; }
 
-    @keyframes pop {
-      0%   { transform: scale(0.5) rotate(-10deg); }
-      60%  { transform: scale(1.18) rotate(5deg); }
+    @keyframes lovePop {
+      0%   { transform: scale(0.4) rotate(-15deg); opacity: 0; }
+      60%  { transform: scale(1.25) rotate(8deg);  opacity: 1; }
       100% { transform: scale(1) rotate(0); }
     }
 
     #chat {
-      background: rgba(255,255,255,0.18);
-      backdrop-filter: blur(14px);
-      border-radius: 28px;
+      background: rgba(255, 245, 250, 0.6);
+      backdrop-filter: blur(18px);
+      border-radius: 32px;
       width: 92%;
-      max-width: 400px;
-      margin: 30px auto;
-      padding: 20px;
-      border: 1px solid rgba(255,255,255,0.12);
+      max-width: 420px;
+      margin: 35px auto;
+      padding: 24px;
+      border: 2px solid rgba(255, 133, 162, 0.3);
     }
 
     #messages {
-      height: 180px;
+      height: 200px;
       overflow-y: auto;
       text-align: left;
-      padding-right: 10px;
-      margin-bottom: 15px;
+      padding-right: 12px;
+      margin-bottom: 20px;
     }
 
     .msg {
-      background: rgba(0,0,0,0.28);
-      padding: 10px 16px;
-      border-radius: 20px;
-      margin: 10px 0;
-      font-size: 1rem;
-      max-width: 82%;
-      word-wrap: break-word;
-    }
-
-    #status {
-      font-size: 1.4rem;
-      margin: 15px 0;
+      background: rgba(255, 209, 220, 0.5);
+      padding: 12px 18px;
+      border-radius: 24px;
+      margin: 12px 0;
+      font-size: 1.05rem;
+      max-width: 80%;
+      color: #4a2c3f;
     }
 
     .winOverlay {
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.78);
-      backdrop-filter: blur(10px);
+      background: rgba(255, 245, 250, 0.92);
+      backdrop-filter: blur(14px);
       display: none;
       justify-content: center;
       align-items: center;
-      z-index: 999;
+      z-index: 1000;
     }
 
     .winBox {
-      background: rgba(255,255,255,0.95);
-      color: #222;
-      padding: 35px 25px;
-      border-radius: 36px;
+      background: white;
+      border: 4px solid #ff85a2;
+      border-radius: 40px;
+      padding: 40px 30px;
       width: 90%;
-      max-width: 380px;
-      box-shadow: 0 25px 70px rgba(0,0,0,0.45);
+      max-width: 400px;
+      box-shadow: 0 30px 80px rgba(255, 133, 162, 0.4);
       text-align: center;
-      animation: appear 0.6s ease;
+      animation: sweetAppear 0.7s ease;
     }
 
-    @keyframes appear {
-      from { opacity: 0; transform: scale(0.65) translateY(30px); }
+    @keyframes sweetAppear {
+      from { opacity: 0; transform: scale(0.7) translateY(40px); }
       to   { opacity: 1; transform: scale(1) translateY(0); }
     }
 
     .bigSymbol {
-      font-size: 120px;
-      margin-bottom: 20px;
-      text-shadow: 0 5px 20px rgba(255,46,99,0.5);
+      font-size: 140px;
+      margin-bottom: 25px;
+      text-shadow: 0 6px 25px rgba(255, 77, 130, 0.5);
     }
 
     .bigSymbol.winner-heart {
-      animation: heartbeat 1.3s infinite;
+      animation: loveBeat 1.4s infinite;
     }
 
-    @keyframes heartbeat {
+    @keyframes loveBeat {
       0%,100%   { transform: scale(1); }
-      50%       { transform: scale(1.18); }
+      50%       { transform: scale(1.22); }
     }
 
     #resultText {
-      color: #ff2e63;
-      font-size: 2rem;
-      margin: 15px 0 30px;
+      color: #ff4d82;
+      font-family: 'Dancing Script', cursive;
+      font-size: 3.5rem;
+      margin: 20px 0 35px;
     }
   </style>
 </head>
 <body>
 
-<h1>💖🌝 උම්ම්ම්ම්ම 😘🌝💖</h1>
+<h1>💗 You & Me Forever 💗</h1>
 
 <div id="menu">
-  <button onclick="createRoom()">Create Room</button><br><br>
-  <input id="joinCode" placeholder="Enter Room Code 💌"/><br><br>
-  <button onclick="joinRoom()">Join Room</button>
+  <button onclick="createRoom()">Create Our Room</button><br><br>
+  <input id="joinCode" placeholder="Enter Love Code 💕"/><br><br>
+  <button onclick="joinRoom()">Join My Love</button>
 </div>
 
 <div id="game">
-  <h3>Room: <span id="roomCode"></span></h3>
+  <h3>Our Secret Room: <span id="roomCode"></span></h3>
   <h2 id="status"></h2>
 
   <div id="board"></div>
 
-  <button onclick="requestRestart()">🔁 Restart Game</button>
+  <button onclick="requestRestart()">♡ Play Again ♡</button>
 
   <div id="chat">
     <div id="messages"></div><br>
-    <input id="chatInput" placeholder="Type sweet message 💕"/><br><br>
-    <button onclick="sendMsg()">Send 💌</button>
+    <input id="chatInput" placeholder="Whisper something sweet... 💌"/><br><br>
+    <button onclick="sendMsg()">Send My Heart</button>
   </div>
 </div>
 
 <div class="winOverlay" id="winOverlay">
   <div class="winBox">
     <div class="bigSymbol" id="resultSymbol"></div>
-    <h2 id="resultText"></h2>
+    <div id="resultText"></div>
 
     <div id="taskArea">
-      <input id="taskInput" placeholder="Give a cute task 😘"/><br><br>
-      <button onclick="sendTask()">Send Task</button>
+      <input id="taskInput" placeholder="Your cute wish for me... ♡"/><br><br>
+      <button onclick="sendTask()">Send Wish</button>
     </div>
 
     <div id="closeArea" style="display:none">
@@ -304,7 +309,7 @@ socket.on("roomCreated", id => {
   document.getElementById("menu").style.display = "none";
   document.getElementById("game").classList.add("visible");
   document.getElementById("roomCode").innerText = id;
-  document.getElementById("status").innerText = "Waiting for your love 💕";
+  document.getElementById("status").innerText = "Waiting for my forever love 💗";
 });
 
 socket.on("startGame", d => {
@@ -318,7 +323,7 @@ socket.on("startGame", d => {
 });
 
 function updateStatus(){
-  document.getElementById("status").innerText = myTurn ? "Your turn ❤️" : "Waiting for love 💕";
+  document.getElementById("status").innerText = myTurn ? "Your turn, my love ♡" : "Waiting for you... 💕";
 }
 
 function move(i){
@@ -340,10 +345,9 @@ socket.on("update", b => {
 function render(){
   document.querySelectorAll(".cell").forEach((c, i) => {
     c.innerText = board[i];
-    c.className = "cell"; // reset
+    c.className = "cell";
     if(board[i]){
-      if(board[i] === "❤️") c.classList.add("heart");
-      if(board[i] === "💕") c.classList.add("love");
+      c.classList.add(board[i] === "❤️" ? "heart" : "love");
     }
   });
 }
@@ -354,12 +358,12 @@ socket.on("win", winSymbol => {
   symEl.innerText = winSymbol;
   
   if(winSymbol === symbol){
-    document.getElementById("resultText").innerText = "YOU WIN ❤️";
+    document.getElementById("resultText").innerText = "You Won My Heart! ♡";
     symEl.classList.add("winner-heart");
     document.getElementById("taskArea").style.display = "block";
     document.getElementById("closeArea").style.display = "none";
   } else {
-    document.getElementById("resultText").innerText = "YOU LOSE 💔";
+    document.getElementById("resultText").innerText = "You Stole My Heart Anyway 💗";
     document.getElementById("taskArea").style.display = "none";
     document.getElementById("closeArea").style.display = "block";
   }
@@ -411,6 +415,10 @@ socket.on("chat", m => {
   `);
 });
 
+// ────────────────────────────────────────────────
+// Backend logic remains the same (no changes needed)
+// ────────────────────────────────────────────────
+
 io.on("connection", socket => {
   socket.on("createRoom", () => {
     const id = Math.random().toString(36).substring(2, 8);
@@ -425,26 +433,18 @@ io.on("connection", socket => {
     r.players.push(socket.id);
     socket.join(id);
 
-    // First player = ❤️    Second player = 💕
     io.to(r.players[0]).emit("startGame", { symbol: "❤️", roomId: id });
-    io.to(r.players[1]).emit("startGame", { symbol: "💕", roomId: id });
+    io.to(r.players[1]).emit("startGame", { symbol: "💗", roomId: id });
   });
 
   socket.on("move", ({ roomId, board }) => {
-    const wins = [
-      [0,1,2], [3,4,5], [6,7,8],
-      [0,3,6], [1,4,7], [2,5,8],
-      [0,4,8], [2,4,6]
-    ];
-
+    const wins = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
     for (const [a,b,c] of wins) {
       if (board[a] && board[a] === board[b] && board[a] === board[c]) {
         io.to(roomId).emit("win", board[a]);
         return;
       }
     }
-
-    // No win → send update to opponent
     socket.to(roomId).emit("update", board);
   });
 
@@ -452,15 +452,10 @@ io.on("connection", socket => {
     io.to(roomId).emit("restart");
   });
 
-  socket.on("chat", d => {
-    io.to(d.roomId).emit("chat", d.msg);
-  });
-
-  socket.on("task", d => {
-    socket.to(d.roomId).emit("task", d.task);
-  });
+  socket.on("chat", d => io.to(d.roomId).emit("chat", d.msg));
+  socket.on("task", d => socket.to(d.roomId).emit("task", d.task));
 });
 
 server.listen(3000, () => {
-  console.log("💖 Server running → http://localhost:3000");
+  console.log("💗 Love Tic Tac Toe running → http://localhost:3000");
 });
