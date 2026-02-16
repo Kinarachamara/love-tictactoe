@@ -448,12 +448,13 @@ function makeChoice(choice){
 function updateScores(rawScores){
   const myScore = symbol === "❤️" ? rawScores[0] : rawScores[1];
   const oppScore = symbol === "❤️" ? rawScores[1] : rawScores[0];
-  document.getElementById("scores").innerText = `You: ${myScore} ♡ Love: ${oppScore}`;
+  document.getElementById("scores").innerText = "You: " + myScore + " ♡ Love: " + oppScore;
+
 }
 
 socket.on("roundResult", data => {
   // Show result, e.g. status
-  let resultText = `You chose ${data.myChoice}, Love chose ${data.oppChoice}. `;
+  let resultText = "You chose " + data.myChoice + ", Love chose " + data.oppChoice + ". ";
   if(data.winner === 'me') resultText += "You win this round! ♡";
   else if(data.winner === 'opponent') resultText += "Love wins this round 💗";
   else resultText += "It's a tie! 💕";
