@@ -204,7 +204,7 @@ app.get("/", (req, res) => {
       background: rgba(255, 245, 250, 0.6);
       backdrop-filter: blur(18px);
       border-radius: 32px;
-      width: 92%;
+      width: 50%;
       max-width: 420px;
       margin: 35px auto;
       padding: 24px;
@@ -556,7 +556,7 @@ io.on("connection", socket => {
     r.players.push(socket.id);
     socket.join(id);
 
-    const symbols = ["❤️", "💗"];
+    const symbols = ["❤️", "💋"];
     io.to(r.players[0]).emit("startGame", { symbol: symbols[0], roomId: id, gameType, playerIndex: 0, scores: r.state.scores });
     socket.emit("startGame", { symbol: symbols[1], roomId: id, gameType, playerIndex: 1, scores: r.state.scores });
   });
