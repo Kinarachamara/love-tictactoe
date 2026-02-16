@@ -368,7 +368,7 @@ socket.on("roomCreated", id => {
   document.getElementById("roomMenu").style.display = "none";
   setupGame();
   document.getElementById("roomCode").innerText = id;
-  document.getElementById("status").innerText = "Waiting for my forever love 💗";
+  document.getElementById("status").innerText = "Waiting for my love 💗";
 });
 
 socket.on("startGame", d => {
