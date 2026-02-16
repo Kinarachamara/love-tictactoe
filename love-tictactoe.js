@@ -282,7 +282,7 @@ app.get("/", (req, res) => {
 </head>
 <body>
 
-<h1>💗 Our Love Games 💗</h1>
+<h1>💗 💋 💗</h1>
 
 <div id="mainMenu">
   <button onclick="selectGame('ttt')">Play Tic-Tac-Toe ♡</button><br><br>
@@ -605,7 +605,7 @@ io.on("connection", socket => {
       // Check overall win (first to 3)
       if(r.state.scores[0] >= 3 || r.state.scores[1] >= 3) {
         const overallWinner = r.state.scores[0] >= 3 ? 0 : 1;
-        const winSymbol = overallWinner === 0 ? "❤️" : "💗";
+        const winSymbol = overallWinner === 0 ? "❤️" : "💋";
         io.to(r.players[0]).emit("win", {symbol: winSymbol, isWinner: overallWinner === 0});
         io.to(r.players[1]).emit("win", {symbol: winSymbol, isWinner: overallWinner === 1});
       } else {
