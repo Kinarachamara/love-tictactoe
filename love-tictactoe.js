@@ -16,7 +16,7 @@ app.get("/", (req, res) => {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
   <meta name="theme-color" content="#ff85a2"/>
-  <title>Love Games 💗 You & Me</title>
+  <title> 💗 You & Me</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -315,7 +315,7 @@ app.get("/", (req, res) => {
   <div id="chat">
     <div id="messages"></div><br>
     <input id="chatInput" placeholder="Whisper something sweet... 💌"/><br><br>
-    <button onclick="sendMsg()">Send My Heart</button>
+    <button onclick="sendMsg()">Send something</button>
   </div>
 </div>
 
